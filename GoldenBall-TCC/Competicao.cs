@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,103 +13,132 @@ namespace GoldenBall_TCC
         {
             List<Cluster> Clusters = new List<Cluster>();
 
-            double[,] dist = GerarMatrizDistancia(datasets[1]);
+            foreach (Dataset dataset in datasets)
+            {
+                #region Gerar clusters
+                double[,] dist = GerarMatrizDistancia(dataset);
 
-            int qntDepo = datasets[1].QntDepositos;
-            int clientPorCluster = datasets[1].QntClientes / datasets[1].QntDepositos;
-            bool[] clienteDisponivelId = new bool[datasets[1].QntClientes];
+                int qntDepo = dataset.QntDepositos;
+                int clientPorCluster = dataset.QntClientes / dataset.QntDepositos;
 
-            int[,] idClient = GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
-            bool[] clienteDisponivelDistancia = new bool[datasets[1].QntClientes];
+                bool[] clienteDisponivelId = new bool[dataset.QntClientes];
+                int[,] idClient = GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
 
-            double[,] distanciaClienteParaDeposito = GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
+                bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
+                double[,] distanciaClienteParaDeposito = GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
 
-            Clusters = GerarClusterData(idClient, distanciaClienteParaDeposito, datasets[1]);
+                Clusters = GerarClusterData(idClient, distanciaClienteParaDeposito, dataset);
 
-            List<List<List<Tuple<int, double>>>> matrizAdjacenciaGeral = GerarMatrizAdjacencia(Clusters);
+                #endregion
 
-            Clusters = SetarDadosDoDepositoNoCluster(Clusters, datasets[1]);
+                #region Gerar Rota
+                List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral = GerarMatrizAdjacencia(Clusters);
 
-            //Utils.PrintarClusters(Clusters);
+                Clusters = SetarDadosDoDepositoNoCluster(Clusters, dataset);
 
-            //GerarRotaInicial(Clusters, matrizAdjacenciaGeral);
-            Utils.PrintarClusters(Clusters);
+                GerarRotaInicial(Clusters, matrizAdjacenciaGeral);
+                #endregion
+
+                Utils.PrintarClusters(Clusters);
+            }
+
         }
 
-        public static List<Cluster> GerarRotaInicial(List<Cluster> clusters, List<List<List<Tuple<int, double>>>> matrizAdjacenciaGeral)
+        public static List<Cluster> GerarRotaInicial(List<Cluster> clusters, List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral)
         {
             Random random = new Random();
 
             foreach (Cluster cluster in clusters)
             {
-                int demandaAtualRota;
+                int demandaAtualRota = 0;
+
                 double distRotaAtual;
 
-                Cliente primeiroCliente = new Cliente();
-                primeiroCliente = cluster.Clientes[random.Next(cluster.Clientes.Count)];
+                List<Cliente> clientesVisitados = new List<Cliente>();
 
-                primeiroCliente.Visitado = true;
-                demandaAtualRota = primeiroCliente.Demanda;
-                Console.WriteLine("Cliente adicionado: " + primeiroCliente.Id);
-                cluster.Rota.Caminho.Add(primeiroCliente.Id);
-                cluster.Rota.Distancia = primeiroCliente.DistanciaDeposito;
+                Cliente cliente = new Cliente();
 
-                List<Cliente> copia = new List<Cliente>(cluster.Clientes);
-                Cliente cliente = GetClienteById(copia, primeiroCliente.IdProximoCliente);
-                copia.Remove(primeiroCliente);
-
-                int contador = 1;
-
-                while (true)
+                while (clientesVisitados.Count != cluster.Clientes.Count)
                 {
-                    if (copia.Count == 0)
-                        break;
-                    if (cliente.Visitado)
+                    List<Tuple<Cliente, double>> vetorDistancia = new List<Tuple<Cliente, double>>();
+
+                    int indiceCliente;
+                    int indiceCluster;
+                    int quantidadeClientes;
+
+                    if (clientesVisitados.Count == 0)
                     {
-                        Cliente clientAnterior = cliente;
-                        cliente = GetClienteById(copia, cliente.IdProximoCliente);
-                        copia.Remove(clientAnterior);
+                        cliente = cluster.Clientes[random.Next(cluster.Clientes.Count)];
+                        cliente.Visitado = true;
+                        clientesVisitados.Add(cliente);
+                        demandaAtualRota += cliente.Demanda;
+                        cluster.Rota.Caminho.Add(cliente.Id);
+                        cluster.Rota.Distancia += cliente.DistanciaDeposito; // Calcula a distancia do deposito para o primeiro cliente.
+
+                        indiceCluster = clusters.IndexOf(cluster);
+                        indiceCliente = cluster.Clientes.IndexOf(cliente);
+                        quantidadeClientes = cluster.Clientes.Count;
+
+                        vetorDistancia = PegarVetorDistanciasClientes(indiceCluster, indiceCliente, quantidadeClientes, matrizAdjacenciaGeral);
+                        vetorDistancia.Sort((a, b) => a.Item2.CompareTo(b.Item2));
+                        vetorDistancia.RemoveAt(0);
+                        cliente = vetorDistancia[0].Item1;
+                        cluster.Rota.Distancia += vetorDistancia[0].Item2; // Adiciona a distancia do novo cliente.
+                    }
+                    else
+                    {
+                        cliente.Visitado = true;
+                        clientesVisitados.Add(cliente);
+                        demandaAtualRota += cliente.Demanda;
+                        cluster.Rota.Caminho.Add(cliente.Id);
+                        indiceCluster = clusters.IndexOf(cluster);
+                        indiceCliente = cluster.Clientes.IndexOf(cliente);
+                        quantidadeClientes = cluster.Clientes.Count;
+                        vetorDistancia = PegarVetorDistanciasClientes(indiceCluster, indiceCliente, quantidadeClientes, matrizAdjacenciaGeral);
+                        vetorDistancia.Sort((a, b) => a.Item2.CompareTo(b.Item2));
+                        vetorDistancia.RemoveAt(0);
+                        Cliente antigo = cliente;
+                        cliente = vetorDistancia[0].Item1;
+
+                        if (clientesVisitados.Contains(cliente))
+                        {
+                            PegarDistanciaClienteMaisProximo(clientesVisitados, cluster.Clientes, vetorDistancia);
+                            cliente = vetorDistancia[0].Item1;
+                        }
+
+                        if (cluster.Capacidade < cliente.Demanda + demandaAtualRota) // Valida antes de ir pro novo cliente se a demanda do novo cliente somada com a demanda total é maior que o limite da rota.
+                        {
+                            cluster.Rota.Distancia += antigo.DistanciaDeposito; // Ida do cliente antigo ao deposito.
+                            cluster.Rota.Caminho.Add(clusters.IndexOf(cluster));
+                            demandaAtualRota = 0;
+                            cluster.Rota.Distancia += cliente.DistanciaDeposito; // Volta do deposito ao cliente novo.
+                        }
+                        else
+                        {
+                            cluster.Rota.Distancia += vetorDistancia[0].Item2; // Adiciona a distancia do novo cliente.
+                        }
 
                     }
-
-                    if (cluster.Capacidade < demandaAtualRota)
-                    {
-                        cluster.Rota.Distancia += CalcularDistancia(cluster.Deposito.CoordenadaX, cliente.CoordenadaX, cluster.Deposito.CoordenadaY, cliente.CoordenadaY);
-                        cluster.Rota.Caminho.Add(cluster.Deposito.Id);
-                        demandaAtualRota = 0;
-                    }
-                    Console.WriteLine("Cliente adicionado: " + cliente.Id);
-                    demandaAtualRota = cliente.Demanda;
-                    cluster.Rota.Caminho.Add(cliente.Id);
-                    cliente.Visitado = true;
-
-                    cluster.Rota.Distancia += cliente.DistanciaProximoCliente;
-
-                    cliente = GetClienteById(copia, cliente.IdProximoCliente);
-                    contador++;
                 }
 
-                //foreach (Cliente cliente in cluster.Clientes)
-                //{
-
-                //    if (cliente.Visitado)
-                //        continue;
-                //    if (cluster.Capacidade < demandaAtualRota)
-                //    {
-                //        cluster.Rota.Distancia += CalcularDistancia(cluster.Deposito.CoordenadaX, cliente.CoordenadaX, cluster.Deposito.CoordenadaY, cliente.CoordenadaY);
-                //        cluster.Rota.Caminho.Add(cluster.Deposito.Id);
-                //        demandaAtualRota = 0;
-                //    }
-                //    //Console.WriteLine("Cliente adicionado: " + cliente.Id);
-                //    demandaAtualRota = cliente.Demanda;
-                //    cluster.Rota.Caminho.Add(cliente.Id);
-
-                //    cluster.Rota.Distancia += cliente.DistanciaProximoCliente;
-                //}
+                cluster.Rota.Distancia += CalcularDistancia(cluster.Deposito.CoordenadaX, cliente.CoordenadaX, cluster.Deposito.CoordenadaY, cliente.CoordenadaY);
+                cluster.Rota.Caminho.Add(clusters.IndexOf(cluster));
 
             }
 
             return clusters;
+        }
+
+        public static List<Tuple<Cliente, double>> PegarVetorDistanciasClientes(int cluster, int cliente, int quantidadeClientes, List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral)
+        {
+            List<Tuple<Cliente, double>> vetorDistancia = new List<Tuple<Cliente, double>>();
+
+            for (int i = 0; i < quantidadeClientes - 1; i++)
+            {
+                vetorDistancia.Add(matrizAdjacenciaGeral[cluster][cliente][i]);
+            }
+
+            return vetorDistancia;
         }
 
         public static Cliente GetClienteById(List<Cliente> clientes, int id)
@@ -123,6 +153,9 @@ namespace GoldenBall_TCC
 
         public static List<Cluster> GerarClusterData(int[,] grupos, double[,] dist, Dataset dataset)
         {
+            Random random = new Random();
+            int deposito = random.Next(grupos.GetLength(0));
+
             List<Cluster> Clusters = new List<Cluster>();
             for (int i = 0; i < grupos.GetLength(0); i++)
             {
@@ -140,39 +173,58 @@ namespace GoldenBall_TCC
             return Clusters;
         }
 
-        public static List<List<List<Tuple<int, double>>>> GerarMatrizAdjacencia(List<Cluster> clusters)
+        public static List<List<List<Tuple<Cliente, double>>>> GerarMatrizAdjacencia(List<Cluster> clusters)
         {
-
-            List<List<List<Tuple<int, double>>>> cuboAdjacencia = new List<List<List<Tuple<int, double>>>>(); // LOUCURAAAAAA
+            List<List<List<Tuple<Cliente, double>>>> cuboAdjacencia = new List<List<List<Tuple<Cliente, double>>>>(); // LOUCURAAAAAA
 
             Random random = new Random();
 
             foreach (Cluster cluster in clusters)
             {
-                List<List<Tuple<int, double>>> matrizAdjacenciaCluster = new List<List<Tuple<int, double>>>();
+                List<List<Tuple<Cliente, double>>> matrizAdjacenciaCluster = new List<List<Tuple<Cliente, double>>>();
 
                 foreach (Cliente clienteAtual in cluster.Clientes)
                 {
-                    List<Tuple<int, double>> vetorAdjacencia = new List<Tuple<int, double>>();
+                    List<Tuple<Cliente, double>> vetorAdjacencia = new List<Tuple<Cliente, double>>();
 
                     foreach (Cliente proxCliente in cluster.Clientes)
                     {
-                        Tuple<int, double> tupla;
-                        tupla = Tuple.Create(proxCliente.Id, CalcularDistancia(clienteAtual.CoordenadaX, proxCliente.CoordenadaX, clienteAtual.CoordenadaY, proxCliente.CoordenadaY));
-                        if (proxCliente.IdProximoCliente == tupla.Item1)
-                            continue;
+                        Tuple<Cliente, double> tupla;
+                        tupla = Tuple.Create(proxCliente, CalcularDistancia(clienteAtual.CoordenadaX, proxCliente.CoordenadaX, clienteAtual.CoordenadaY, proxCliente.CoordenadaY));
                         vetorAdjacencia.Add(tupla);
                     }
 
-                    clienteAtual.IdProximoCliente = PegarIdClienteMaisProximo(vetorAdjacencia);
-                    clienteAtual.DistanciaProximoCliente = PegarDistanciaClienteMaisProximo(vetorAdjacencia);
-
                     matrizAdjacenciaCluster.Add(vetorAdjacencia);
                 }
+
                 cuboAdjacencia.Add(matrizAdjacenciaCluster);
             }
 
             return cuboAdjacencia;
+        }
+
+        public static Tuple<Cliente, double> PegarDistanciaClienteMaisProximo(List<Cliente> clientesVisitados, List<Cliente> clientes, List<Tuple<Cliente, double>> vetorAdjacencia)
+        {
+            double menor = 99999;
+
+            foreach (var tuple in vetorAdjacencia)
+            {
+                if (tuple.Item2 == 0)
+                    continue;
+                if (menor > tuple.Item2)
+                    menor = tuple.Item2;
+            }
+            if (vetorAdjacencia.Count == 1)
+                return vetorAdjacencia[0];
+            Tuple<Cliente, double> proximoCliente = vetorAdjacencia[0];
+
+            if (clientesVisitados.Contains(proximoCliente.Item1))
+            {
+                vetorAdjacencia.RemoveAt(0);
+                proximoCliente = PegarDistanciaClienteMaisProximo(clientesVisitados, clientes, vetorAdjacencia);
+            }
+
+            return proximoCliente;
         }
 
         public static Cluster GetClienteDataByCluster(int[] grupo, double[] dist, Dataset dataset)
@@ -240,43 +292,10 @@ namespace GoldenBall_TCC
             return clusters;
         }
 
-        public static int PegarIdClienteMaisProximo(List<Tuple<int, double>> vetorAdjacencia)
-        {
-            double menor = 99999;
-
-            foreach (var tuple in vetorAdjacencia)
-            {
-                if (tuple.Item2 == 0)
-                    continue;
-                if (menor > tuple.Item2)
-                    menor = tuple.Item2;
-            }
-            vetorAdjacencia.OrderBy(x => x.Item2);
-            vetorAdjacencia.RemoveAll(tupla => tupla.Item2 != menor);
-            Tuple<int, double> proximoCliente = vetorAdjacencia.First();
-            return proximoCliente.Item1;
-        }
-
-        public static double PegarDistanciaClienteMaisProximo(List<Tuple<int, double>> vetorAdjacencia)
-        {
-            double menor = 99999;
-
-            foreach (var tuple in vetorAdjacencia)
-            {
-                if (tuple.Item2 == 0)
-                    continue;
-                if (menor > tuple.Item2)
-                    menor = tuple.Item2;
-            }
-            vetorAdjacencia.RemoveAll(tupla => tupla.Item2 != menor);
-            Tuple<int, double> proximoCliente = vetorAdjacencia.Last();
-            return proximoCliente.Item2;
-        }
-
         // Pega a menor distancia de um cliente de uma linha de uma matriz, quando o valor é pego, o indice do valor fica indisponivel de se pegar em outras matrizes. 
         public static Tuple<double, int> PegarMenorValor(int linha, double[,] vetor, bool[] clientDisp, int qntCluster)
         {
-            Tuple<double, int> menor = new Tuple<double, int>(99999, 99999);
+            Tuple<double, int> menor = new Tuple<double, int>(double.PositiveInfinity, int.MaxValue);
 
             for (int i = 0; i < vetor.Length / qntCluster; i++)
             {
@@ -339,55 +358,5 @@ namespace GoldenBall_TCC
             return clusters;
         }
 
-        public static Dataset Mapper(string path)
-        {
-            Dataset dataset = new Dataset();
-
-            using StreamReader sr = File.OpenText(path);
-            string linha;
-
-            // Lê a primeira linha (informações gerais do arquivo)
-            linha = sr.ReadLine();
-            string[] infoGerais = linha.Split();
-            dataset.QntVeiculos = int.Parse(infoGerais[1]);
-
-            dataset.QntClientes = int.Parse(infoGerais[2]);
-            dataset.QntDepositos = int.Parse(infoGerais[3]);
-            dataset.QntLocais = dataset.QntClientes + dataset.QntDepositos; // inclui o depósito
-
-            // Lê a info de duração na rota e carga por veiculo
-
-            for (int i = 0; i < dataset.QntDepositos; i++)
-            {
-                linha = sr.ReadLine();
-                string[] depositInfo = linha.Split();
-                dataset.CapacidadeDeposito = int.Parse(depositInfo[1]);
-            }
-
-            dataset.Id = new int[dataset.QntLocais];
-            dataset.CoordenadaX = new double[dataset.QntLocais];
-            dataset.CoordenadaY = new double[dataset.QntLocais];
-            dataset.TempoServico = new double[dataset.QntClientes];
-            dataset.Demanda = new int[dataset.QntClientes];
-
-            linha = sr.ReadLine();
-            string[] info = linha.Split();
-
-            for (int i = 0; i < dataset.QntLocais; i++)
-            {
-                dataset.Id[i] = int.Parse(info[0]) - 1;
-                dataset.CoordenadaX[i] = double.Parse(info[1]);
-                dataset.CoordenadaY[i] = double.Parse(info[2]);
-                //dataset.TempoServico[i] = double.Parse(info[3]);
-                if (i < dataset.QntClientes)
-                    dataset.Demanda[i] = int.Parse(info[4]);
-
-                linha = sr.ReadLine();
-                if (linha != null)
-                    info = linha.Split();
-            }
-
-            return dataset;
-        }
     }
 }

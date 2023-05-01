@@ -20,8 +20,5 @@ namespace GoldenBall_TCC
 
         public bool Visitado { get; set; }
 
-        public int IdProximoCliente { get; set; }
-
-        public double DistanciaProximoCliente { get; set; }
     }
 }

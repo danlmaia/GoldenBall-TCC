@@ -9,7 +9,7 @@ internal class Program
         string pathDataset;
 
 
-        for (int i = 1; i < 33; i++)
+        for (int i = 1; i <= 33; i++)
         {
             if (i >= 10)
                 pathDataset = String.Format("..\\..\\..\\Datasets\\p{0}.txt", i);

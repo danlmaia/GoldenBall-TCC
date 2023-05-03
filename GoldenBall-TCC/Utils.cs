@@ -8,35 +8,11 @@ namespace GoldenBall_TCC
 {
     public class Utils
     {
-        //public static List<double[]> ConverterMatrizInListVector(double[,] clusters)
-        //{
-        //    List<double[]> clustersSeparados = new List<double[]>();
-
-        //    for (int i = 0; i < clusters.GetLength(0); i++)
-        //    {
-        //        double[] vetor = new double[clusters.GetLength(1)];
-        //        for (int j = 0; j < clusters.GetLength(1); j++)
-        //        {
-        //            vetor[j] = clusters[i, j];
-        //        }
-        //        clustersSeparados.Add(vetor);
-        //    }
-
-        //    foreach (double[] vetor in clustersSeparados)
-        //    {
-        //        foreach (double numero in vetor)
-        //        {
-        //            Console.Write(numero + " ");
-        //        }
-        //        Console.WriteLine();
-        //    }
-
-        //    return clustersSeparados;
-        //}
-
-        public static void PrintarClusters(List<Cluster> clusters)
+        public static void PrintarClusters(int idDataset ,List<Cluster> clusters)
         {
+            Console.WriteLine("************ DATASET: " + (idDataset + 1));
             Console.WriteLine("--------------------- ROTAS GERADAS -------------------------");
+
 
             foreach (Cluster cluster in clusters)
             {
@@ -48,7 +24,7 @@ namespace GoldenBall_TCC
                     demanda += cliente.Demanda;
                 }
                 Console.WriteLine("Demanda total da rota: " + demanda);
-                Console.WriteLine("Distancia da rota: " + cluster.Rota.Distancia);
+                Console.WriteLine("Distancia da rota: " + Math.Round(cluster.Rota.Distancia, 2));
                 foreach (int cliente in cluster.Rota.Caminho)
                 {
                     Console.WriteLine("clientes visitados: " + cliente);

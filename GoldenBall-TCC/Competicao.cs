@@ -28,7 +28,6 @@ namespace GoldenBall_TCC
                 double[,] distanciaClienteParaDeposito = GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
 
                 Clusters = GerarClusterData(idClient, distanciaClienteParaDeposito, dataset);
-
                 #endregion
 
                 #region Gerar Rota
@@ -39,9 +38,94 @@ namespace GoldenBall_TCC
                 GerarRotaInicial(Clusters, matrizAdjacenciaGeral);
                 #endregion
 
-                Utils.PrintarClusters(Clusters);
+                Utils.PrintarClusters(datasets.IndexOf(dataset), Clusters);
             }
 
+        }
+
+        public static List<Cluster> GerarClusterData(int[,] grupos, double[,] dist, Dataset dataset)
+        {
+
+            List<Cluster> Clusters = new List<Cluster>();
+            for (int i = 0; i < grupos.GetLength(0); i++)
+            {
+                int[] grupo = new int[grupos.GetLength(1)];
+                double[] distGrupo = new double[grupos.GetLength(1)];
+                for (int j = 0; j < grupos.GetLength(1); j++)
+                {
+                    grupo[j] = grupos[i, j]; // separando o vetor de Id de cliente.
+                    distGrupo[j] = dist[i, j]; // separando o vetor de distancia depo-clientes.
+                }
+
+                Clusters.Add(GetClienteDataByCluster(grupo, distGrupo, dataset)); // Adiciona na lista de cluster os dados do datasets nos clientes que foram separados no vetor. 
+            }
+
+            return Clusters;
+        }
+
+        public static Cluster GetClienteDataByCluster(int[] grupo, double[] dist, Dataset dataset)
+        {
+            Cluster Cluster = new Cluster();
+
+            for (int i = 0; i < grupo.Length; i++)
+            {
+                Cliente cliente = new Cliente();
+                cliente.Id = dataset.Id[grupo[i]];
+                cliente.CoordenadaX = dataset.CoordenadaX[grupo[i]];
+                cliente.CoordenadaY = dataset.CoordenadaY[grupo[i]];
+                cliente.Demanda = dataset.Demanda[grupo[i]];
+                cliente.DistanciaDeposito = dist[i]; // Criando e setando os clientes do cluster.
+
+                Cluster.Clientes.Add(cliente);
+            }
+            Cluster.Capacidade = dataset.CapacidadeDeposito;
+            return Cluster;
+        }
+
+        public static int[,] GerarIdClientClusters(double[,] dist, bool[] clientDisp, int qntCluster, int ClientePorCluster)
+        {
+            double[,] copiaMatriz = (double[,])dist.Clone(); // Gambiara (Daria pra fazer um método só se eu retornasse uma tupla de matrizes)
+            int[,] clusters = new int[qntCluster, ClientePorCluster];
+            Tuple<double, int> menor = new(0, 0);
+
+            for (int i = 0; i < ClientePorCluster; i++)
+            {
+                for (int j = 0; j < qntCluster; j++)
+                {
+                    menor = PegarMenorValor(j, copiaMatriz, clientDisp, qntCluster);
+
+                    if (menor == null)
+                    {
+                        PegarMenorValor(j, copiaMatriz, clientDisp, qntCluster);
+                    }
+                    clusters[j, i] = menor.Item2;
+                }
+            }
+
+            return clusters;
+        }
+
+        public static double[,] GerarDistClusters(double[,] dist, bool[] clientDisp, int qntCluster, int ClientePorCluster)
+        {
+            double[,] copiaMatriz = (double[,])dist.Clone(); // Gambiara (Daria pra fazer um método só se eu retornasse uma tupla de matrizes)
+            double[,] clusters = new double[qntCluster, ClientePorCluster];
+            Tuple<double, int> menor = new(0, 0);
+
+            for (int i = 0; i < ClientePorCluster; i++)
+            {
+                for (int j = 0; j < qntCluster; j++)
+                {
+                    menor = PegarMenorValor(j, copiaMatriz, clientDisp, qntCluster);
+
+                    if (menor == null)
+                    {
+                        PegarMenorValor(j, copiaMatriz, clientDisp, qntCluster);
+                    }
+                    clusters[j, i] = menor.Item1;
+                }
+            }
+
+            return clusters;
         }
 
         public static List<Cluster> GerarRotaInicial(List<Cluster> clusters, List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral)
@@ -127,6 +211,7 @@ namespace GoldenBall_TCC
             }
 
             return clusters;
+
         }
 
         public static List<Tuple<Cliente, double>> PegarVetorDistanciasClientes(int cluster, int cliente, int quantidadeClientes, List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral)
@@ -139,38 +224,6 @@ namespace GoldenBall_TCC
             }
 
             return vetorDistancia;
-        }
-
-        public static Cliente GetClienteById(List<Cliente> clientes, int id)
-        {
-            foreach (Cliente cliente in clientes)
-            {
-                if (cliente.Id == id)
-                    return cliente;
-            }
-            return null;
-        }
-
-        public static List<Cluster> GerarClusterData(int[,] grupos, double[,] dist, Dataset dataset)
-        {
-            Random random = new Random();
-            int deposito = random.Next(grupos.GetLength(0));
-
-            List<Cluster> Clusters = new List<Cluster>();
-            for (int i = 0; i < grupos.GetLength(0); i++)
-            {
-                int[] grupo = new int[grupos.GetLength(1)];
-                double[] distGrupo = new double[grupos.GetLength(1)];
-                for (int j = 0; j < grupos.GetLength(1); j++)
-                {
-                    grupo[j] = grupos[i, j]; // separando o vetor de Id de cliente.
-                    distGrupo[j] = dist[i, j]; // separando o vetor de distancia depo-clientes.
-                }
-
-                Clusters.Add(GetClienteDataByCluster(grupo, distGrupo, dataset)); // Adiciona na lista de cluster os dados do datasets nos clientes que foram separados no vetor. 
-            }
-
-            return Clusters;
         }
 
         public static List<List<List<Tuple<Cliente, double>>>> GerarMatrizAdjacencia(List<Cluster> clusters)
@@ -225,71 +278,6 @@ namespace GoldenBall_TCC
             }
 
             return proximoCliente;
-        }
-
-        public static Cluster GetClienteDataByCluster(int[] grupo, double[] dist, Dataset dataset)
-        {
-            Cluster Cluster = new Cluster();
-
-            for (int i = 0; i < grupo.Length; i++)
-            {
-                Cliente cliente = new Cliente();
-                cliente.Id = dataset.Id[grupo[i]];
-                cliente.CoordenadaX = dataset.CoordenadaX[grupo[i]];
-                cliente.CoordenadaY = dataset.CoordenadaY[grupo[i]];
-                cliente.Demanda = dataset.Demanda[grupo[i]];
-                cliente.DistanciaDeposito = dist[i]; // Criando e setando os clientes do cluster.
-
-                Cluster.Clientes.Add(cliente);
-            }
-            Cluster.Capacidade = dataset.CapacidadeDeposito;
-            return Cluster;
-        }
-
-        public static int[,] GerarIdClientClusters(double[,] dist, bool[] clientDisp, int qntCluster, int ClientePorCluster)
-        {
-            double[,] copiaMatriz = (double[,])dist.Clone(); // Gambiara (Daria pra fazer um método só se eu retornasse uma tupla de matrizes)
-            int[,] clusters = new int[qntCluster, ClientePorCluster];
-            Tuple<double, int> menor = new(0, 0);
-
-            for (int i = 0; i < qntCluster; i++)
-            {
-                for (int j = 0; j < ClientePorCluster; j++)
-                {
-                    menor = PegarMenorValor(i, copiaMatriz, clientDisp, qntCluster);
-
-                    if (menor == null)
-                    {
-                        PegarMenorValor(i, copiaMatriz, clientDisp, qntCluster);
-                    }
-                    clusters[i, j] = menor.Item2;
-                }
-            }
-
-            return clusters;
-        }
-
-        public static double[,] GerarDistClusters(double[,] dist, bool[] clientDisp, int qntCluster, int ClientePorCluster)
-        {
-            double[,] copiaMatriz = (double[,])dist.Clone(); // Gambiara (Daria pra fazer um método só se eu retornasse uma tupla de matrizes)
-            double[,] clusters = new double[qntCluster, ClientePorCluster];
-            Tuple<double, int> menor = new(0, 0);
-
-            for (int i = 0; i < qntCluster; i++)
-            {
-                for (int j = 0; j < ClientePorCluster; j++)
-                {
-                    menor = PegarMenorValor(i, copiaMatriz, clientDisp, qntCluster);
-
-                    if (menor == null)
-                    {
-                        PegarMenorValor(i, copiaMatriz, clientDisp, qntCluster);
-                    }
-                    clusters[i, j] = menor.Item1;
-                }
-            }
-
-            return clusters;
         }
 
         // Pega a menor distancia de um cliente de uma linha de uma matriz, quando o valor é pego, o indice do valor fica indisponivel de se pegar em outras matrizes. 

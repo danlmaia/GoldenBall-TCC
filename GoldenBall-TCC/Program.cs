@@ -5,11 +5,10 @@ internal class Program
     private static void Main(string[] args)
     {
         List<Dataset> Datasets = new List<Dataset>();
-        List<Cluster> Clusters = new List<Cluster>();
         string pathDataset;
 
 
-        for (int i = 1; i <= 33; i++)
+        for (int i = 33; i <= 33; i++)
         {
             if (i >= 10)
                 pathDataset = String.Format("..\\..\\..\\Datasets\\p{0}.txt", i);
@@ -21,8 +20,15 @@ internal class Program
         }
 
         int quantidadeEquipes = 4;
+        int quantidadeTemporadas = 2;
+        foreach (Dataset dataset in Datasets)
+        {
+            List<Time> times = new List<Time>();
+            times = Time.GerarTimes(dataset, quantidadeEquipes);
 
-        Competicao.Start(Datasets, quantidadeEquipes);
+            Competicao.Start(times, quantidadeTemporadas);
+        }
+
 
     }
 

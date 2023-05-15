@@ -65,7 +65,7 @@ namespace GoldenBall_TCC
         {
             List<Tuple<Cliente, double>> vetorDistancia = new List<Tuple<Cliente, double>>();
 
-            for (int i = 0; i < quantidadeClientes - 1; i++)
+            for (int i = 0; i < quantidadeClientes; i++)
             {
                 vetorDistancia.Add(matrizAdjacenciaGeral[cluster][cliente][i]);
             }

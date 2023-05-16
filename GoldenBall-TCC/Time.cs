@@ -53,86 +53,6 @@ namespace GoldenBall_TCC
             return capitao;
         }
 
-        //public static Cluster TreinarJogador(Cluster cluster, List<Cluster> clusters, List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral)
-        //{
-        //    Random random = new Random();
-
-        //    int demandaAtualRota = 0;
-
-        //    List<Cliente> clientesVisitados = new List<Cliente>();
-
-        //    Cliente cliente = new Cliente();
-
-        //    while (clientesVisitados.Count != cluster.Clientes.Count)
-        //    {
-        //        List<Tuple<Cliente, double>> vetorDistancia = new List<Tuple<Cliente, double>>();
-
-        //        int indiceCliente;
-        //        int indiceCluster;
-        //        int quantidadeClientes;
-
-        //        if (clientesVisitados.Count == 0)
-        //        {
-        //            cliente = cluster.Clientes[random.Next(cluster.Clientes.Count)];
-        //            cliente.Visitado = true;
-        //            clientesVisitados.Add(cliente);
-        //            demandaAtualRota += cliente.Demanda;
-        //            cluster.Rota.Caminho.Add(cliente.Id);
-        //            cluster.Rota.Distancia += cliente.DistanciaDeposito; // Calcula a distancia do deposito para o primeiro cliente.
-
-        //            indiceCluster = clusters.IndexOf(cluster);
-        //            indiceCliente = cluster.Clientes.IndexOf(cliente);
-        //            quantidadeClientes = cluster.Clientes.Count;
-
-        //            vetorDistancia = Utils.PegarVetorDistanciasClientes(indiceCluster, indiceCliente, quantidadeClientes, matrizAdjacenciaGeral);
-        //            vetorDistancia.Sort((a, b) => a.Item2.CompareTo(b.Item2));
-        //            vetorDistancia.RemoveAt(0);
-        //            cliente = vetorDistancia[0].Item1;
-        //            cluster.Rota.Distancia += vetorDistancia[0].Item2; // Adiciona a distancia do novo cliente.
-        //        }
-        //        else
-        //        {
-        //            cliente.Visitado = true;
-        //            clientesVisitados.Add(cliente);
-        //            demandaAtualRota += cliente.Demanda;
-        //            cluster.Rota.Caminho.Add(cliente.Id);
-        //            indiceCluster = clusters.IndexOf(cluster);
-        //            indiceCliente = cluster.Clientes.IndexOf(cliente);
-        //            quantidadeClientes = cluster.Clientes.Count;
-        //            vetorDistancia = Utils.PegarVetorDistanciasClientes(indiceCluster, indiceCliente, quantidadeClientes, matrizAdjacenciaGeral);
-        //            vetorDistancia.Sort((a, b) => a.Item2.CompareTo(b.Item2));
-        //            vetorDistancia.RemoveAt(0);
-        //            Cliente antigo = cliente;
-        //            cliente = vetorDistancia[0].Item1;
-
-        //            if (clientesVisitados.Contains(cliente))
-        //            {
-        //                Utils.PegarDistanciaClienteMaisProximo(clientesVisitados, cluster.Clientes, vetorDistancia);
-        //                cliente = vetorDistancia[0].Item1;
-        //            }
-
-        //            if (cluster.Capacidade < cliente.Demanda + demandaAtualRota) // Valida antes de ir pro novo cliente se a demanda do novo cliente somada com a demanda total é maior que o limite da rota.
-        //            {
-        //                cluster.Rota.Distancia += antigo.DistanciaDeposito; // Ida do cliente antigo ao deposito.
-        //                cluster.Rota.Caminho.Add(clusters.IndexOf(cluster));
-        //                demandaAtualRota = 0;
-        //                cluster.Rota.Distancia += cliente.DistanciaDeposito; // Volta do deposito ao cliente novo.
-        //            }
-        //            else
-        //            {
-        //                cluster.Rota.Distancia += vetorDistancia[0].Item2; // Adiciona a distancia do novo cliente.
-        //            }
-
-        //        }
-        //    }
-
-        //    cluster.Rota.Distancia += Utils.CalcularDistancia(cluster.Deposito.CoordenadaX, cliente.CoordenadaX, cluster.Deposito.CoordenadaY, cliente.CoordenadaY);
-        //    cluster.Rota.Caminho.Add(clusters.IndexOf(cluster));
-
-        //    return cluster;
-
-        //}
-
         public static List<Time> GerarTimes(Dataset dataset, int QuantidadeEquipes)
         {
             List<Cluster> Clusters = new List<Cluster>();
@@ -162,6 +82,7 @@ namespace GoldenBall_TCC
 
                 Clusters = GerarRotaInicial(Clusters, matrizAdjacenciaGeral);
                 #endregion
+
                 Time time = new Time();
 
                 foreach (Cluster cluster in Clusters)
@@ -205,7 +126,7 @@ namespace GoldenBall_TCC
                         cliente.Visitado = true;
                         clientesVisitados.Add(cliente);
                         demandaAtualRota += cliente.Demanda;
-                        cluster.Rota.Caminho.Add(cluster.Deposito.Id);
+                        //cluster.Rota.Caminho.Add(cluster.Deposito.Id);
                         cluster.Rota.Caminho.Add(cliente.Id);
                         cluster.Rota.Distancia += cliente.DistanciaDeposito; // Calcula a distancia do deposito para o primeiro cliente.
 
@@ -246,11 +167,6 @@ namespace GoldenBall_TCC
                             cluster.Rota.Caminho.Add(cluster.Deposito.Id);
                             demandaAtualRota = 0;
                             cluster.Rota.Distancia += cliente.DistanciaDeposito; // Volta do deposito ao cliente novo.
-
-                            if(clientesVisitados.Count == cluster.Clientes.Count - 1) // Validar
-                            {
-
-                            }
                         }
                         else
                         {
@@ -273,26 +189,134 @@ namespace GoldenBall_TCC
 
         }
 
-        public static double TreinarJogador(Time time)
+        public static Time TreinarJogador(Time time)
         {
-            double distancia = 0;
-            Random random = new Random();
-
-
-            foreach (Cluster cliente in time.Jogadores)
+            foreach (Cluster cluster in time.Jogadores)
             {
-                Cliente c = cliente.Clientes[random.Next(cliente.Clientes.Count)];
-                foreach (int id in cliente.Rota.Caminho)
-                {
-                    if(id == cliente.Deposito.Id)
-                    {
+                Console.WriteLine("ANTES: " + cluster.Rota.Distancia);
+                List<int> novaRota = TrocarRota(cluster);
 
-                    }
+                double dist = 0;
+
+                dist = GerarNovaDistancia(cluster, novaRota);
+
+                cluster.Rota.Distancia = dist;
+                Console.WriteLine("Depois: " + cluster.Rota.Distancia);
+
+
+            }
+            return time;
+
+        }
+
+        public static double GerarNovaDistancia(Cluster cluster, List<int> rota)
+        {
+            double dist = 0;
+            double demanda = 0;
+            List<int> ListaAux = new List<int>();
+
+            Cliente clienteAtual = new Cliente();
+            Cliente proximoCliente = new Cliente();
+
+            foreach (int id in rota)
+            {
+                if (rota.IndexOf(id) == 0)
+                {
+                    ListaAux.Add(cluster.Deposito.Id);
+                    ListaAux.Add(id);
+
+                    clienteAtual = Cluster.GetClienteByIdAndCluster(id, cluster);
+                    proximoCliente = Cluster.GetClienteByIdAndCluster(rota[1], cluster);
+
+                    demanda += clienteAtual.Demanda;
+
+                    dist += clienteAtual.DistanciaDeposito;
+                    dist += Utils.CalcularDistancia(clienteAtual.CoordenadaX, proximoCliente.CoordenadaX, clienteAtual.CoordenadaY, proximoCliente.CoordenadaY);
                 }
+                else
+                {
+                    clienteAtual = Cluster.GetClienteByIdAndCluster(id, cluster);
+                    ListaAux.Add(clienteAtual.Id);
+                    int prox = rota.IndexOf(id) + 1;
+
+                    if(prox == rota.Count)
+                    {
+                        dist += clienteAtual.DistanciaDeposito;
+                        ListaAux.Add(cluster.Deposito.Id);
+                        if(dist > cluster.Rota.Distancia)
+                        {
+                            while(dist > cluster.Rota.Distancia) // TODO Quantidade de treinos
+                            {
+                                List<int> newRota = TrocarRota(cluster);
+                                dist = GerarNovaDistancia(cluster, newRota);
+                            }
+                            return dist;
+                        }
+                        else
+                        {
+                            cluster.Rota.Caminho.Clear();
+                            cluster.Rota.Caminho.AddRange(ListaAux);
+                            return dist;
+                        }
+                    }
+                    proximoCliente = Cluster.GetClienteByIdAndCluster(rota[prox], cluster);
+
+                    demanda += clienteAtual.Demanda;
+
+                    if (demanda + proximoCliente.Demanda > cluster.Capacidade)
+                    {
+                        dist += clienteAtual.DistanciaDeposito;
+                        ListaAux.Add(cluster.Deposito.Id);
+                        demanda = 0;
+                        dist += proximoCliente.DistanciaDeposito;
+                    }
+                    else
+                        dist += Utils.CalcularDistancia(clienteAtual.CoordenadaX, proximoCliente.CoordenadaX, clienteAtual.CoordenadaY, proximoCliente.CoordenadaY);
+
+                }
+
+            }
+            if (ListaAux.Last() != cluster.Deposito.Id) // verifica se o ultimo cliente visitado foi o deposito.
+            {
+                dist += clienteAtual.DistanciaDeposito;
+                ListaAux.Add(cluster.Deposito.Id);
             }
 
-
-            return distancia;
+            return dist;
         }
+
+        public static List<int> TrocarRota(Cluster cluster)
+        {
+            List<int> novaRota = new List<int>();
+            novaRota.AddRange(cluster.Rota.Caminho);
+            novaRota.RemoveAll(x => x == cluster.Deposito.Id);
+
+            Random random = new Random();
+            Cliente cliente;
+            cliente = cluster.Clientes[random.Next(cluster.Clientes.Count)];
+            if(cliente.Id != novaRota.Last())
+            {
+                int indice = novaRota.IndexOf(cliente.Id);
+                int proximoCliente = novaRota.IndexOf(cliente.Id) + 1;
+
+                int temp = novaRota[indice];
+                novaRota[indice] = novaRota[proximoCliente];
+                novaRota[proximoCliente] = temp;
+
+            }
+            else
+            {
+                int indice = novaRota.IndexOf(cliente.Id);
+                int clienteAnterior = novaRota.IndexOf(cliente.Id) - 1;
+
+                int temp = novaRota[indice];
+                novaRota[indice] = novaRota[clienteAnterior];
+                novaRota[clienteAnterior] = temp;
+            }
+
+            return novaRota;
+        }
+
+        
     }
 }

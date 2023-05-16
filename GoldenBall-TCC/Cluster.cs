@@ -80,7 +80,15 @@ namespace GoldenBall_TCC
             return clusters;
         }
 
-
+        public static Cliente GetClienteByIdAndCluster(int id, Cluster cluster)
+        {
+            foreach (var cliente in cluster.Clientes)
+            {
+                if (id == cliente.Id)
+                    return cliente;
+            }
+            return null;
+        }
 
     }
 

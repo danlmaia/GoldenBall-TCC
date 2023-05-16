@@ -6,7 +6,7 @@
         {
             for (int i = 0; i < quantidadeTemporadas; i++)
             {
-                
+                Time.TreinarJogador(times[i]);
             }
         }
 

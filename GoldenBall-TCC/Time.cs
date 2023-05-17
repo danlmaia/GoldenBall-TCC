@@ -176,7 +176,7 @@ namespace GoldenBall_TCC
                     }
                 }
 
-                if(cluster.Rota.Caminho.Last() != clusters.IndexOf(cluster)) // verifica se o ultimo cliente visitado foi o deposito.
+                if(cluster.Rota.Caminho.Last() != cluster.Deposito.Id) // verifica se o ultimo cliente visitado foi o deposito.
                 {
                     cluster.Rota.Distancia += Utils.CalcularDistancia(cluster.Deposito.CoordenadaX, cliente.CoordenadaX, cluster.Deposito.CoordenadaY, cliente.CoordenadaY);
                     cluster.Rota.Caminho.Add(cluster.Deposito.Id);
@@ -193,7 +193,7 @@ namespace GoldenBall_TCC
         {
             foreach (Cluster cluster in time.Jogadores)
             {
-                Console.WriteLine("ANTES: " + cluster.Rota.Distancia);
+                //Console.WriteLine("ANTES: " + cluster.Rota.Distancia);
                 List<int> novaRota = TrocarRota(cluster);
 
                 double dist = 0;
@@ -201,8 +201,7 @@ namespace GoldenBall_TCC
                 dist = GerarNovaDistancia(cluster, novaRota);
 
                 cluster.Rota.Distancia = dist;
-                Console.WriteLine("Depois: " + cluster.Rota.Distancia);
-
+                //Console.WriteLine("Depois: " + cluster.Rota.Distancia);
 
             }
             return time;
@@ -212,7 +211,7 @@ namespace GoldenBall_TCC
         public static double GerarNovaDistancia(Cluster cluster, List<int> rota)
         {
             double dist = 0;
-            double demanda = 0;
+            int demanda = 0;
             List<int> ListaAux = new List<int>();
 
             Cliente clienteAtual = new Cliente();
@@ -224,6 +223,7 @@ namespace GoldenBall_TCC
                 {
                     ListaAux.Add(cluster.Deposito.Id);
                     ListaAux.Add(id);
+                    Console.WriteLine("Distancia antes de tudo: " + dist);
 
                     clienteAtual = Cluster.GetClienteByIdAndCluster(id, cluster);
                     proximoCliente = Cluster.GetClienteByIdAndCluster(rota[1], cluster);
@@ -231,7 +231,10 @@ namespace GoldenBall_TCC
                     demanda += clienteAtual.Demanda;
 
                     dist += clienteAtual.DistanciaDeposito;
+                    Console.WriteLine(string.Format("Saida do deposito para o cliente {0} distancia percorrida {1}", clienteAtual.Id, dist));
                     dist += Utils.CalcularDistancia(clienteAtual.CoordenadaX, proximoCliente.CoordenadaX, clienteAtual.CoordenadaY, proximoCliente.CoordenadaY);
+                    Console.WriteLine(string.Format("Saida do cliente {0} para o cliente {1} distancia percorrida {2}", clienteAtual.Id, proximoCliente.Id, dist));
+
                 }
                 else
                 {
@@ -242,6 +245,7 @@ namespace GoldenBall_TCC
                     if(prox == rota.Count)
                     {
                         dist += clienteAtual.DistanciaDeposito;
+                        Console.WriteLine(string.Format("Foi do cliente {0} para o deposito finalizando as entregas, distancia percorrida: {1}", clienteAtual.Id, dist));
                         ListaAux.Add(cluster.Deposito.Id);
                         if(dist > cluster.Rota.Distancia)
                         {
@@ -265,21 +269,24 @@ namespace GoldenBall_TCC
 
                     if (demanda + proximoCliente.Demanda > cluster.Capacidade)
                     {
+                        Console.WriteLine(string.Format("Demanda maxima atingida: {0}", demanda + proximoCliente.Demanda));
                         dist += clienteAtual.DistanciaDeposito;
+                        Console.WriteLine(string.Format("Foi do cliente {0} reabastecer no deposito, distancia percorrida: {1}", clienteAtual.Id ,dist));
                         ListaAux.Add(cluster.Deposito.Id);
                         demanda = 0;
                         dist += proximoCliente.DistanciaDeposito;
+                        Console.WriteLine(string.Format("Foi do deposito para o cliente {0}, distancia percorrida: {1}", proximoCliente.Id ,dist));
+
                     }
                     else
+                    {
                         dist += Utils.CalcularDistancia(clienteAtual.CoordenadaX, proximoCliente.CoordenadaX, clienteAtual.CoordenadaY, proximoCliente.CoordenadaY);
+
+                        Console.WriteLine(string.Format("Saida do cliente {0} para o cliente {1} distancia percorrida {2}", clienteAtual.Id, proximoCliente.Id, dist));
+                    }
 
                 }
 
-            }
-            if (ListaAux.Last() != cluster.Deposito.Id) // verifica se o ultimo cliente visitado foi o deposito.
-            {
-                dist += clienteAtual.DistanciaDeposito;
-                ListaAux.Add(cluster.Deposito.Id);
             }
 
             return dist;

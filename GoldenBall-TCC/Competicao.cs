@@ -8,6 +8,7 @@
             {
                 Time.TreinarJogador(times[i]);
             }
+                Time.TreinarTime(times);
         }
 
         public static void Partida(Time time1 , Time time2)

@@ -217,7 +217,7 @@ namespace GoldenBall_TCC
             foreach (Cluster cluster in time.Jogadores)
             {
                 //Console.WriteLine("ANTES: " + cluster.Rota.Distancia);
-                List<int> novaRota = TrocarRotaInternoCluster(cluster);
+                List<int> novaRota = TrocarRotaInternoCluster(cluster, cluster.Rota.Caminho);
 
                 double dist = 0;
 
@@ -349,7 +349,7 @@ namespace GoldenBall_TCC
                         {
                             while(dist > cluster.Rota.Distancia) // TODO Quantidade de treinos
                             {
-                                List<int> newRota = TrocarRotaInternoCluster(cluster);
+                                List<int> newRota = TrocarRotaInternoCluster(cluster, rota);
                                 dist = CalcularNovaDistancia(cluster, newRota);
                             }
                             return dist;
@@ -390,10 +390,10 @@ namespace GoldenBall_TCC
             return dist;
         }
 
-        public static List<int> TrocarRotaInternoCluster(Cluster cluster)
+        public static List<int> TrocarRotaInternoCluster(Cluster cluster, List<int> rota)
         {
             List<int> novaRota = new List<int>();
-            novaRota.AddRange(cluster.Rota.Caminho);
+            novaRota.AddRange(rota);
             novaRota.RemoveAll(x => x == cluster.Deposito.Id);
 
             Random random = new Random();
@@ -422,41 +422,6 @@ namespace GoldenBall_TCC
             return novaRota;
         }
 
-        //public static List<int> TrocarRotaEntreCluster(Time time)
-        //{
-        //    Random random = new Random();
-
-        //    Cluster cluster1;
-        //    Cluster cluster2;
-
-        //    do
-        //    {
-        //        cluster1 = time.Jogadores[random.Next(time.Jogadores.Count)];
-        //        cluster2 = time.Jogadores[random.Next(time.Jogadores.Count)];
-        //    } while (cluster1 != cluster2);
-
-
-        //    Cliente cliente1 = cluster1.Clientes[random.Next(cluster1.Clientes.Count)];
-        //    Cliente cliente2 = cluster2.Clientes[random.Next(cluster2.Clientes.Count)];
-
-        //    List<int> novaRotaCluster1 = new List<int>();
-        //    List<int> novaRotaCluster2 = new List<int>();
-
-        //    novaRotaCluster1.AddRange(cluster1.Rota.Caminho);
-        //    novaRotaCluster1.RemoveAll(x => x == cluster1.Deposito.Id);
-
-        //    novaRotaCluster2.AddRange(cluster2.Rota.Caminho);
-        //    novaRotaCluster2.RemoveAll(x => x == cluster2.Deposito.Id);
-
-        //    int indiceClienteCluster1 = novaRotaCluster1.IndexOf(cliente1.Id);
-        //    int indiceClienteCluster2 = novaRotaCluster2.IndexOf(cliente2.Id);
-
-        //    int temp = novaRotaCluster1[indiceClienteCluster1];
-        //    novaRotaCluster1[indiceClienteCluster1] = novaRotaCluster2[indiceClienteCluster2];
-        //    novaRotaCluster2[indiceClienteCluster2] = temp;
-
-        //}
-
         public static Cluster GetClusterByIdAndTime(int id, Time time)
         {
             foreach (Cluster cluster in time.Jogadores)
@@ -469,50 +434,24 @@ namespace GoldenBall_TCC
 
         public static Time TrocarClienteEntreCluster(Time time, int idCluster1, int idCluster2, int idCliente1, int idCliente2)
         {
+            Time novoTime = time;
             Cliente c1 = null;
             Cliente c2 = null;
-            Cluster aux = GetClusterByIdAndTime(idCluster1, time);
+            Cluster cluster;
 
-            foreach (Cluster jogador in time.Jogadores)
-            {
-                if (jogador.Id == idCluster1)
-                {
-                    c1 = Cluster.GetClienteByIdAndCluster(idCliente1, jogador);
-                    jogador.Clientes.Remove(c1);
-                    foreach (Cluster cluster in time.Jogadores)
-                    {
-                        c2 = Cluster.GetClienteByIdAndCluster(idCliente2, cluster);
-                        if (c2 != null)
-                        {
-                            jogador.Clientes.Add(c2);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            foreach (Cluster jogador in time.Jogadores)
-            {
-                if (jogador.Id == idCluster2)
-                {
-                    c2 = Cluster.GetClienteByIdAndCluster(idCliente2, jogador);
-                    jogador.Clientes.Remove(c2);
-                    foreach (Cluster cluster in time.Jogadores)
-                    {
-                        c1 = Cluster.GetClienteByIdAndCluster(idCliente1, aux);
-                        if (c1 != null)
-                        {
-                            jogador.Clientes.Add(c1);
-                            break;
-                        }
-                    }
-                }
-            }
-
+            c2 = Cluster.GetClienteByIdAndCluster(idCliente2, novoTime.Jogadores[idCluster2]);
+            cluster = GetClusterByIdAndTime(idCluster1, time);
+            c2.DistanciaDeposito = Utils.CalcularDistancia(cluster.Deposito.CoordenadaX, c2.CoordenadaX, cluster.Deposito.CoordenadaY, c2.CoordenadaY);
             
-            
+            c1 = Cluster.GetClienteByIdAndCluster(idCliente1, novoTime.Jogadores[idCluster1]);
+            cluster = GetClusterByIdAndTime(idCluster2, time);
+            c1.DistanciaDeposito = Utils.CalcularDistancia(cluster.Deposito.CoordenadaX, c1.CoordenadaX, cluster.Deposito.CoordenadaY, c1.CoordenadaY);
 
-            Time novoTime = time;
+            novoTime.Jogadores[idCluster1].Clientes.Add(c2);
+            novoTime.Jogadores[idCluster2].Clientes.Add(c1);
+            novoTime.Jogadores[idCluster1].Clientes.Remove(c1);
+            novoTime.Jogadores[idCluster2].Clientes.Remove(c2);
+
             return novoTime;
         }
     }

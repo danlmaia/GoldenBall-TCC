@@ -2,9 +2,9 @@
 {
     public static class Competicao
     {
-        public static void Start(List<Time> times, int quantidadeTemporadas)
+        public static void Start(List<Time> times, int quantidadeEquipes)
         {
-            for (int i = 0; i < quantidadeTemporadas; i++)
+            for (int i = 0; i < quantidadeEquipes; i++)
             {
                 Time.TreinarJogador(times[i]);
             }

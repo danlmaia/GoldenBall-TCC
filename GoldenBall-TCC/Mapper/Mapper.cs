@@ -53,6 +53,30 @@ namespace GoldenBall_TCC
 
             return dataset;
         }
+
+        public static TimeDTO TimeToTimeDTO(Time time)
+        {
+            return new TimeDTO()
+            {
+                Capitao = time.Capitao,
+                Pontuacao = time.Pontuacao,
+                PiorJogador = time.PiorJogador,
+                Valor = time.Valor,
+                Jogadores = time.Jogadores,
+            };
+        }
+
+        public static Time TimeDTOToTime(TimeDTO timeDTO)
+        {
+            return new Time()
+            {
+                Capitao = timeDTO.Capitao,
+                Jogadores = timeDTO.Jogadores,
+                Valor = timeDTO.Valor,
+                PiorJogador = timeDTO.PiorJogador,
+                Pontuacao = timeDTO.Pontuacao
+            };
+        }
     }
 }
 

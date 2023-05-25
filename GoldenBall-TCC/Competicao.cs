@@ -80,25 +80,23 @@ namespace GoldenBall_TCC
 
         public static List<Time> Transferencia(List<Time> times)
         {
-            Cluster jogador;
-            Cluster outroJogador;
+            Cluster piorJogadorTime1;
+            Cluster jogadorSubstituidoTime2;
+            Cluster melhorJogadorTime2;
+            Cluster jogadorSubstituidoTime1;
             for (int j = 0; j < times.Count - 1; j++)
             {
-                jogador = times[j].Jogadores.Last();
-                outroJogador = times[j + 1].Jogadores.First(x => x.Id == jogador.Id);
+                piorJogadorTime1 = times[j].Jogadores.Last();
+                jogadorSubstituidoTime2 = times[j + 1].Jogadores.First(x => x.Id == piorJogadorTime1.Id);
 
-                int index = times[j + 1].Jogadores.IndexOf(outroJogador);
+                times[j].Jogadores[times[j].Jogadores.Count - 1] = jogadorSubstituidoTime2;
+                times[j+1].Jogadores[times[j + 1].Jogadores.FindIndex(x => x.Id == piorJogadorTime1.Id)] = piorJogadorTime1;
 
-                times[j].Jogadores[times[j].Jogadores.Count - 1] = outroJogador;
-                times[j+1].Jogadores[index] = jogador;
+                melhorJogadorTime2 = times[j+1].Jogadores.First();
+                jogadorSubstituidoTime1 = times[j].Jogadores.First(x => x.Id == melhorJogadorTime2.Id);
 
-                jogador = times[j+1].Jogadores.First();
-                outroJogador = times[j].Jogadores.First(x => x.Id == jogador.Id);
-
-                index = times[j].Jogadores.IndexOf(outroJogador);
-
-                times[j + 1].Jogadores[times[j].Jogadores.Count - 1] = outroJogador;
-                times[j].Jogadores[index] = jogador;
+                times[j + 1].Jogadores[times[j + 1].Jogadores.FindIndex(x => x.Id == jogadorSubstituidoTime1.Id)] = jogadorSubstituidoTime1;
+                times[j].Jogadores[times[j].Jogadores.FindIndex(x => x.Id == melhorJogadorTime2.Id)] = melhorJogadorTime2;
             }
 
             times = Time.OrdenarJogadores(times);

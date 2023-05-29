@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GoldenBall_TCC
 {
@@ -35,8 +38,67 @@ namespace GoldenBall_TCC
                     return;
                 }
             }
+        }
+
+        public static void PrintarSolucao(int idDataset, Time time)
+        {
+            HashSet<int> itensUnicos = new HashSet<int>();
+            Console.WriteLine("--------------------- ROTAS GERADAS -------------------------");
+
+            foreach (Cluster cluster in time.Jogadores)
+            {
+                Console.WriteLine("Deposito: " + time.Jogadores.IndexOf(cluster));
+                Console.WriteLine("Demanda deposito: " + cluster.Capacidade);
+                int demanda = 0;
+                foreach (var cliente in cluster.Clientes)
+                {
+                    demanda += cliente.Demanda;
+                }
+                Console.WriteLine("Demanda total da rota: " + demanda);
+                Console.WriteLine("Distancia da rota: " + Math.Round(cluster.Rota.Distancia, 2));
+
+                foreach (int cliente in cluster.Rota.Caminho)
+                {
+                    itensUnicos.Add(cliente);
+                    Console.WriteLine("clientes visitados: " + cliente);
+                }
+            }
+
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("Valor da solução: " + time.Valor);
+            Console.WriteLine("quantidade de clientes: " + itensUnicos.Count);
+            SalvarSolucao(idDataset, time);
 
         }
+
+        public static void SalvarSolucao(int idDataset,Time time)
+        {
+            string nomeArquivo = string.Format("C:\\Users\\danie\\source\\repos\\GoldenBall-TCC\\GoldenBall-TCC\\Solution\\Dataset {0}.txt", idDataset + 1);
+
+            using (StreamWriter writer = new StreamWriter(nomeArquivo))
+            {
+                writer.WriteLine("Dataset ID: " + idDataset);
+                foreach (Cluster cluster in time.Jogadores)
+                {
+                    for (int i = 0; i < cluster.Rota.Caminho.Count; i++)
+                    {
+                        writer.Write(cluster.Rota.Caminho[i]);
+
+                        // Adicione um espaço após cada item, exceto para o último item
+                        if (i < cluster.Rota.Caminho.Count)
+                        {
+                            writer.Write(" ");
+                        }
+                    }
+                }
+                writer.WriteLine();
+                writer.WriteLine("Valor da solucao: " + time.Valor);
+            }
+        }
+
+
+
+
 
         public static Tuple<Cliente, double> PegarDistanciaClienteMaisProximo(List<Cliente> clientesVisitados, List<Cliente> clientes, List<Tuple<Cliente, double>> vetorAdjacencia)
         {
@@ -145,7 +207,6 @@ namespace GoldenBall_TCC
 
             return clusters;
         }
-
 
     }
 }

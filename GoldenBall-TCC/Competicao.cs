@@ -4,15 +4,15 @@ namespace GoldenBall_TCC
 {
     public static class Competicao
     {
-        public static void Start(List<Time> times, int quantidadeTemporadas)
+        public static void Start(List<Time> times, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino , int idDataset)
         {
-            Utils.PrintarClusters(0, times);
             for (int i = 0; i < quantidadeTemporadas; i++)
             {
                 List<Tuple<Time, int>> Tabela = new List<Tuple<Time, int>>();
 
-                Time.TreinarJogador(times[i]);
-                times = Time.TreinarTime(times);
+                foreach (Time time in times)
+                    Time.TreinarJogador(time, quantidadeIntraTreino);
+                times = Time.TreinarTime(times, quantidadeInterTreino);
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -33,7 +33,10 @@ namespace GoldenBall_TCC
 
                 times = Time.ZerarPontuacao(times);
                 times = Time.AtualizarTimes(times);
+                
             }
+
+            Utils.PrintarSolucao(idDataset, times[0]);
 
         }
 

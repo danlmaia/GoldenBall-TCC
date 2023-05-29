@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Folder Include="Datasets\" />
+    <Folder Include="Solution\" />
   </ItemGroup>
 
   <ItemGroup>

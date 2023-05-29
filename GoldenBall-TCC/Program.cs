@@ -8,7 +8,7 @@ internal class Program
         string pathDataset;
 
 
-        for (int i = 1; i <= 1; i++)
+        for (int i = 1; i <= 33; i++)
         {
             if (i >= 10)
                 pathDataset = String.Format("..\\..\\..\\Datasets\\p{0}.txt", i);
@@ -20,13 +20,16 @@ internal class Program
         }
 
         int quantidadeEquipes = 4;
-        int quantidadeTemporadas = 2;
+        int quantidadeTemporadas = 10;
+        int quantidadeIntraTreino = 10;
+        int quantidadeInterTreino = 10;
+
         foreach (Dataset dataset in Datasets)
         {
             List<Time> times = new List<Time>();
             times = Time.GerarTimes(dataset, quantidadeEquipes);
 
-            Competicao.Start(times, quantidadeTemporadas);
+            Competicao.Start(times, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino , Datasets.IndexOf(dataset));
         }
 
 

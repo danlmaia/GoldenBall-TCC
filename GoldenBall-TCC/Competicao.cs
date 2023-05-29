@@ -4,15 +4,18 @@ namespace GoldenBall_TCC
 {
     public static class Competicao
     {
-        public static void Start(List<Time> times, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino , int idDataset)
+        public static Time Start(List<Time> times, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino , int idDataset)
         {
+            Time solucaoAntiga = new Time();
+            double MediaValorSolucoesGeral = 0;
+            double MediaValorSolucaoGeralAtual = 0;
             for (int i = 0; i < quantidadeTemporadas; i++)
             {
                 List<Tuple<Time, int>> Tabela = new List<Tuple<Time, int>>();
 
                 foreach (Time time in times)
                     Time.TreinarJogador(time, quantidadeIntraTreino);
-                times = Time.TreinarTime(times, quantidadeInterTreino);
+                times = Time.TreinarTime(times, quantidadeIntraTreino, quantidadeInterTreino);
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -30,14 +33,31 @@ namespace GoldenBall_TCC
                 times = Time.OrdenarJogadores(times);
                 times.Sort((x, y) => y.Pontuacao.CompareTo(x.Pontuacao));
                 times = Transferencia(times);
-
-                times = Time.ZerarPontuacao(times);
-                times = Time.AtualizarTimes(times);
                 
+                if(i == 0)
+                {
+                    MediaValorSolucoesGeral = Time.CalcularValorSolucoesGeral(times);
+                    solucaoAntiga = times[0];
+                }
+                else
+                {
+
+                    times = Time.AtualizarTimes(times);
+                    MediaValorSolucaoGeralAtual = Time.CalcularValorSolucoesGeral(times);
+                    if (solucaoAntiga.Valor <= times[0].Valor) // Verificando se houve melhora na melhor solução.
+                        return solucaoAntiga;
+                    else
+                        solucaoAntiga = times[0];
+
+                    if (MediaValorSolucoesGeral <= MediaValorSolucaoGeralAtual) // Verificando se houve melhora na média da pontuação de todas soluções.
+                        return times[0];
+
+                    MediaValorSolucoesGeral = MediaValorSolucaoGeralAtual;
+                }
+                times = Time.ZerarPontuacao(times);
             }
 
-            Utils.PrintarSolucao(idDataset, times[0]);
-
+            return null;
         }
 
         public static List<Tuple<Time, int>> GerarTabelaClassificacao(List<Time> times)

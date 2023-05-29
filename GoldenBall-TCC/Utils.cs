@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
@@ -40,7 +41,7 @@ namespace GoldenBall_TCC
             }
         }
 
-        public static void PrintarSolucao(int idDataset, Time time)
+        public static void PrintarSolucao(int idDataset, Time time, Stopwatch stopwatch)
         {
             HashSet<int> itensUnicos = new HashSet<int>();
             Console.WriteLine("--------------------- ROTAS GERADAS -------------------------");
@@ -67,17 +68,19 @@ namespace GoldenBall_TCC
             Console.WriteLine("-------------------------");
             Console.WriteLine("Valor da solução: " + time.Valor);
             Console.WriteLine("quantidade de clientes: " + itensUnicos.Count);
-            SalvarSolucao(idDataset, time);
+            SalvarSolucao(idDataset, time, stopwatch);
 
         }
 
-        public static void SalvarSolucao(int idDataset,Time time)
+        public static void SalvarSolucao(int idDataset,Time time, Stopwatch stopwatch)
         {
-            string nomeArquivo = string.Format("C:\\Users\\danie\\source\\repos\\GoldenBall-TCC\\GoldenBall-TCC\\Solution\\Dataset {0}.txt", idDataset + 1);
+            string nomeArquivo = string.Format("C:\\Users\\danie\\source\\repos\\GoldenBall-TCC\\GoldenBall-TCC\\Solution\\pr0{0}.txt", idDataset + 1);
+            if(idDataset == 9)
+                nomeArquivo = string.Format("C:\\Users\\danie\\source\\repos\\GoldenBall-TCC\\GoldenBall-TCC\\Solution\\pr{0}.txt", idDataset + 1);
+
 
             using (StreamWriter writer = new StreamWriter(nomeArquivo))
             {
-                writer.WriteLine("Dataset ID: " + idDataset);
                 foreach (Cluster cluster in time.Jogadores)
                 {
                     for (int i = 0; i < cluster.Rota.Caminho.Count; i++)
@@ -93,7 +96,10 @@ namespace GoldenBall_TCC
                 }
                 writer.WriteLine();
                 writer.WriteLine("Valor da solucao: " + time.Valor);
+                stopwatch.Stop();
+                writer.WriteLine("Tempo de execução: " + stopwatch.Elapsed.TotalSeconds);
             }
+
         }
 
 

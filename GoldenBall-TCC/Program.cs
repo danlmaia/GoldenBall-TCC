@@ -1,4 +1,6 @@
 ﻿using GoldenBall_TCC;
+using System.Data;
+using System.Diagnostics;
 
 internal class Program
 {
@@ -20,16 +22,22 @@ internal class Program
         }
 
         int quantidadeEquipes = 4;
-        int quantidadeTemporadas = 10;
+        int quantidadeTemporadas = 2;
         int quantidadeIntraTreino = 10;
         int quantidadeInterTreino = 10;
 
         foreach (Dataset dataset in Datasets)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             List<Time> times = new List<Time>();
             times = Time.GerarTimes(dataset, quantidadeEquipes);
 
-            Competicao.Start(times, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino , Datasets.IndexOf(dataset));
+            Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino , Datasets.IndexOf(dataset));
+
+            Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch);
+            stopwatch.Restart();
+
         }
 
 

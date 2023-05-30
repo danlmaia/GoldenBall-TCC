@@ -41,7 +41,7 @@ namespace GoldenBall_TCC
             }
         }
 
-        public static void PrintarSolucao(int idDataset, Time time, Stopwatch stopwatch)
+        public static void PrintarSolucao(int idDataset, Time time, Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
         {
             HashSet<int> itensUnicos = new HashSet<int>();
             Console.WriteLine("--------------------- ROTAS GERADAS -------------------------");
@@ -68,15 +68,17 @@ namespace GoldenBall_TCC
             Console.WriteLine("-------------------------");
             Console.WriteLine("Valor da solução: " + time.Valor);
             Console.WriteLine("quantidade de clientes: " + itensUnicos.Count);
-            SalvarSolucao(idDataset, time, stopwatch);
+            SalvarSolucao(idDataset, time, stopwatch, quantidadeEquipe, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino);
 
         }
 
-        public static void SalvarSolucao(int idDataset,Time time, Stopwatch stopwatch)
+        public static void SalvarSolucao(int idDataset,Time time, Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
         {
-            string nomeArquivo = string.Format("C:\\Users\\danie\\source\\repos\\GoldenBall-TCC\\GoldenBall-TCC\\Solution\\pr0{0}.txt", idDataset + 1);
+            string nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\pr0{4}.txt", quantidadeEquipe,
+                    quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino, idDataset + 1);
             if(idDataset == 9)
-                nomeArquivo = string.Format("C:\\Users\\danie\\source\\repos\\GoldenBall-TCC\\GoldenBall-TCC\\Solution\\pr{0}.txt", idDataset + 1);
+                nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\pr0{4}.txt", quantidadeEquipe,
+                    quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino, idDataset + 1);
 
 
             using (StreamWriter writer = new StreamWriter(nomeArquivo))

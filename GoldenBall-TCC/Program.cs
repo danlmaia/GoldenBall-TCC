@@ -20,25 +20,49 @@ internal class Program
             Datasets.Add(Mapper.MapperData(pathDataset));
 
         }
+        int[] quantEquipes = new int[1] { 8 };
+        int[] quantTemporadas = new int[1] { 10 };
+        int[] quantIntra = new int[3] { 20, 50, 100 };
+        //int quantidadeEquipes = 8;
+        //int quantidadeTemporadas = 10;
+        //int quantidadeIntraTreino = 10;
+        //int quantidadeInterTreino = 10;
 
-        int quantidadeEquipes = 4;
-        int quantidadeTemporadas = 2;
-        int quantidadeIntraTreino = 10;
-        int quantidadeInterTreino = 10;
-
-        foreach (Dataset dataset in Datasets)
+        foreach (int quantidadeEquipes in quantEquipes)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            List<Time> times = new List<Time>();
-            times = Time.GerarTimes(dataset, quantidadeEquipes);
+            foreach (int quantidadeTemporadas in quantTemporadas)
+            {
+                foreach (int quantidadeTreino in quantIntra)
+                {
+                        foreach (Dataset dataset in Datasets)
+                        {
+                            var stopwatch = new Stopwatch();
+                            stopwatch.Start();
+                            List<Time> times = new List<Time>();
+                            times = Time.GerarTimes(dataset, quantidadeEquipes);
 
-            Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino , Datasets.IndexOf(dataset));
+                            Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeTreino, quantidadeTreino, Datasets.IndexOf(dataset));
 
-            Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch);
-            stopwatch.Restart();
-
+                            Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeTreino, quantidadeTreino);
+                            stopwatch.Restart();
+                        }
+                }
+            }
         }
+
+        //foreach (Dataset dataset in Datasets)
+        //{
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+        //    List<Time> times = new List<Time>();
+        //    times = Time.GerarTimes(dataset, quantidadeEquipes);
+
+        //    Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino , Datasets.IndexOf(dataset));
+
+        //    Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeIntraTreino, quantidadeIntraTreino);
+        //    stopwatch.Restart();
+
+        //}
 
 
     }

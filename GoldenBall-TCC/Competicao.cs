@@ -41,7 +41,6 @@ namespace GoldenBall_TCC
                 }
                 else
                 {
-
                     times = Time.AtualizarTimes(times);
                     MediaValorSolucaoGeralAtual = Time.CalcularValorSolucoesGeral(times);
                     if (solucaoAntiga.Valor <= times[0].Valor) // Verificando se houve melhora na melhor solução.
@@ -50,14 +49,14 @@ namespace GoldenBall_TCC
                         solucaoAntiga = times[0];
 
                     if (MediaValorSolucoesGeral <= MediaValorSolucaoGeralAtual) // Verificando se houve melhora na média da pontuação de todas soluções.
-                        return times[0];
+                        return solucaoAntiga;
 
                     MediaValorSolucoesGeral = MediaValorSolucaoGeralAtual;
                 }
                 times = Time.ZerarPontuacao(times);
             }
 
-            return null;
+            return times[0];
         }
 
         public static List<Tuple<Time, int>> GerarTabelaClassificacao(List<Time> times)

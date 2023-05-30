@@ -331,8 +331,8 @@ namespace GoldenBall_TCC
                         novaDistCluster1 = CalcularNovaDistanciaInterno(novoCluster1, newRota1);
                         novaDistCluster2 = CalcularNovaDistanciaInterno(novoCluster2, newRota2);
 
-                        //if (novaDistCluster1 <= distAntigaCluster1 && novaDistCluster2 <= distAntigaCluster2)
-                        //{
+                        if (novaDistCluster1 <= distAntigaCluster1 && novaDistCluster2 <= distAntigaCluster2)
+                        {
                             novoCluster1.Rota.Distancia = novaDistCluster1;
                             novoCluster2.Rota.Distancia = novaDistCluster2;
 
@@ -345,7 +345,7 @@ namespace GoldenBall_TCC
                             newTimes.Add(newTime);
                             timeDTO.Jogadores.Remove(novoCluster1);
                             timeDTO.Jogadores.Remove(novoCluster2);
-                        //}
+                        }
                     }
                 }
 

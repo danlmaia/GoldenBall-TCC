@@ -20,9 +20,9 @@ internal class Program
             Datasets.Add(Mapper.MapperData(pathDataset));
 
         }
-        int[] quantEquipes = new int[1] { 8 };
-        int[] quantTemporadas = new int[1] { 10 };
-        int[] quantIntra = new int[3] { 20, 50, 100 };
+        int[] quantEquipes = new int[2] { 4 , 8 };
+        int[] quantTemporadas = new int[3] { 2, 4, 10 };
+        int[] quantIntra = new int[4] { 10, 20, 50, 100 };
         //int quantidadeEquipes = 8;
         //int quantidadeTemporadas = 10;
         //int quantidadeIntraTreino = 10;

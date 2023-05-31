@@ -74,10 +74,10 @@ namespace GoldenBall_TCC
 
         public static void SalvarSolucao(int idDataset,Time time, Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
         {
-            string nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\pr0{4}.txt", quantidadeEquipe,
+            string nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\p0{4}.txt", quantidadeEquipe,
                     quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino, idDataset + 1);
-            if(idDataset == 9)
-                nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\pr0{4}.txt", quantidadeEquipe,
+            if(idDataset >= 9)
+                nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\p{4}.txt", quantidadeEquipe,
                     quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino, idDataset + 1);
 
 

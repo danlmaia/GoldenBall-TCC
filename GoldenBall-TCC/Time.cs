@@ -331,7 +331,7 @@ namespace GoldenBall_TCC
                         novaDistCluster1 = CalcularNovaDistanciaInterno(novoCluster1, newRota1);
                         novaDistCluster2 = CalcularNovaDistanciaInterno(novoCluster2, newRota2);
 
-                        if (novaDistCluster1 <= distAntigaCluster1 && novaDistCluster2 <= distAntigaCluster2)
+                        if (novaDistCluster1 <= distAntigaCluster1 && novaDistCluster2 <= distAntigaCluster2) // Verificar inter treino
                         {
                             novoCluster1.Rota.Distancia = novaDistCluster1;
                             novoCluster2.Rota.Distancia = novaDistCluster2;

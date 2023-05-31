@@ -13,12 +13,15 @@ namespace GoldenBall_TCC
             {
                 List<Tuple<Time, int>> Tabela = new List<Tuple<Time, int>>();
 
-                foreach (Time time in times)
-                    Time.TreinarJogador(time, quantidadeIntraTreino);
-                times = Time.TreinarTime(times, quantidadeIntraTreino, quantidadeInterTreino);
 
-                for (int j = 0; j < 2; j++)
+                for (int j = 0; j < 2; j++) // Ciclos
                 {
+                    foreach (Time time in times)
+                        Time.TreinarJogador(time, quantidadeIntraTreino);
+                    times = Time.TreinarTime(times, quantidadeIntraTreino, quantidadeInterTreino);
+
+                    times = Time.AtualizarTimes(times);
+
                     foreach (Time time in times)
                     {
                         foreach (Time oponente in times)
@@ -32,7 +35,6 @@ namespace GoldenBall_TCC
                 }
                 times = Time.OrdenarJogadores(times);
                 times.Sort((x, y) => y.Pontuacao.CompareTo(x.Pontuacao));
-                times = Transferencia(times);
                 
                 if(i == 0)
                 {
@@ -41,7 +43,6 @@ namespace GoldenBall_TCC
                 }
                 else
                 {
-                    times = Time.AtualizarTimes(times);
                     MediaValorSolucaoGeralAtual = Time.CalcularValorSolucoesGeral(times);
                     if (solucaoAntiga.Valor <= times[0].Valor) // Verificando se houve melhora na melhor solução.
                         return solucaoAntiga;
@@ -53,6 +54,8 @@ namespace GoldenBall_TCC
 
                     MediaValorSolucoesGeral = MediaValorSolucaoGeralAtual;
                 }
+                times = Transferencia(times);
+                times = Time.AtualizarTimes(times);
                 times = Time.ZerarPontuacao(times);
             }
 

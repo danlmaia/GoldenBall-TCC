@@ -39,6 +39,14 @@ namespace GoldenBall_TCC
 
             for (int i = 0; i < dataset.QntLocais; i++)
             {
+                if(i >= dataset.QntClientes)
+                {
+                    Deposito deposito = new Deposito();
+                    deposito.Id = int.Parse(info[0]) - 1;
+                    deposito.CoordenadaX = double.Parse(info[1]);
+                    deposito.CoordenadaY = double.Parse(info[2]);
+                    dataset.Depositos.Add(deposito);
+                }
                 dataset.Id[i] = int.Parse(info[0]) - 1;
                 dataset.CoordenadaX[i] = double.Parse(info[1]);
                 dataset.CoordenadaY[i] = double.Parse(info[2]);

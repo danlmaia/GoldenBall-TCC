@@ -36,7 +36,6 @@ namespace GoldenBall_TCC
                         Console.WriteLine("clientes visitados: " + cliente);
                     }
                     Console.WriteLine("-------------------------");
-                    return;
                 }
             }
         }

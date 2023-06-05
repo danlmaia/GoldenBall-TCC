@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -101,23 +102,29 @@ namespace GoldenBall_TCC
             List<Cluster> Clusters = new List<Cluster>();
 
             List<Time> times = new List<Time>();
+
+            int qntDepo = dataset.QntDepositos;
+            int clientPorCluster = dataset.QntClientes / dataset.QntDepositos;
+
+            #region Clusterização Aleatoria.
+            int[,] idClient = GerarIdAleatorio(dataset.Id, dataset.QntClientes, qntDepo, clientPorCluster);
+            double[,] distanciaClienteParaDeposito = GerarDistanciaClienteDeposito(idClient, qntDepo, clientPorCluster, dataset);
+            #endregion
+
+            #region Clusterização por distancia. 
+            //double[,] dist = Utils.GerarMatrizDistancia(dataset);
+
+            //bool[] clienteDisponivelId = new bool[dataset.QntClientes];
+            //int[,] idClient = Cliente.GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
+
+            //bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
+            //double[,] distanciaClienteParaDeposito = Utils.GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
+            #endregion
+
+
             for (int i = 0; i < QuantidadeEquipes; i++)
             {
-                #region Gerar clusters
-                double[,] dist = Utils.GerarMatrizDistancia(dataset);
-
-                int qntDepo = dataset.QntDepositos;
-                int clientPorCluster = dataset.QntClientes / dataset.QntDepositos;
-
-                bool[] clienteDisponivelId = new bool[dataset.QntClientes];
-                int[,] idClient = Cliente.GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
-
-                bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
-                double[,] distanciaClienteParaDeposito = Utils.GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
-
                 Clusters = Cluster.GerarClusterData(idClient, distanciaClienteParaDeposito, dataset);
-                #endregion
-
                 #region Gerar Rota
                 List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral = Utils.GerarMatrizAdjacencia(Clusters);
 
@@ -140,7 +147,47 @@ namespace GoldenBall_TCC
                 times.Add(time);
             }
 
+            //Utils.PrintarClusters(0, times);
             return times;
+        }
+
+        public static double[,] GerarDistanciaClienteDeposito(int[,] clientes, int quantidadeDeposito, int clientePorDeposito, Dataset dataset)
+        {
+            double[,] matrizDistancia = new double[quantidadeDeposito, clientePorDeposito];
+            for (int i = 0; i < clientes.GetLength(0); i++)
+            {
+                for (int j = 0; j < clientes.GetLength(1); j++)
+                {
+                    matrizDistancia[i, j] = Utils.CalcularDistancia(dataset.Depositos[i].CoordenadaX, dataset.CoordenadaX[clientes[i, j]], dataset.Depositos[i].CoordenadaY, dataset.CoordenadaX[clientes[i, j]]);
+                }
+            }
+
+            return matrizDistancia;
+        }
+
+        public static int[,] GerarIdAleatorio(int[] clientes, int quantidadeClientes, int qntDeposito, int clientePorCluster)
+        {
+            Random random = new Random();
+            int[,] idClientes = new int[qntDeposito, clientePorCluster];
+
+            int indexCliente = -1;
+
+            List<int> copiaClientes = new List<int>();
+            copiaClientes = clientes.ToList();
+            copiaClientes.RemoveAll(x => x >= quantidadeClientes);
+
+            for (int i = 0; i < qntDeposito; i++)
+            {
+                for (int j = 0; j < clientePorCluster; j++)
+                {
+                    indexCliente = random.Next(random.Next(copiaClientes.Count));
+                    int cliente = copiaClientes[indexCliente];
+                    copiaClientes.Remove(cliente);
+                    idClientes[i, j] = cliente;
+                }
+            }
+
+            return idClientes;
         }
 
         public static List<Cluster> GerarRotaInicial(List<Cluster> clusters, List<List<List<Tuple<Cliente, double>>>> matrizAdjacenciaGeral)

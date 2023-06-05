@@ -8,7 +8,10 @@ namespace GoldenBall_TCC
 {
     public class Dataset
     {
-        public Dataset() { }
+        public Dataset() 
+        {
+            Depositos = new List<Deposito>();
+        }
 
         public int[]? Id { get; set; }
 
@@ -31,5 +34,7 @@ namespace GoldenBall_TCC
         public int CapacidadeDeposito { get; set; }
 
         public int TamanhoDaRota { get; set; }
+
+        public List<Deposito> Depositos { get; set; }
     }
 }

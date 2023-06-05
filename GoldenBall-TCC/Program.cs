@@ -10,7 +10,7 @@ internal class Program
         string pathDataset;
 
 
-        for (int i = 3; i <= 3; i++)
+        for (int i = 1; i <= 33; i++)
         {
             if (i >= 10)
                 pathDataset = String.Format("..\\..\\..\\Datasets\\p{0}.txt", i);
@@ -34,18 +34,18 @@ internal class Program
             {
                 foreach (int quantidadeTreino in quantIntra)
                 {
-                        foreach (Dataset dataset in Datasets)
-                        {
-                            var stopwatch = new Stopwatch();
-                            stopwatch.Start();
-                            List<Time> times = new List<Time>();
-                            times = Time.GerarTimes(dataset, quantidadeEquipes);
+                    foreach (Dataset dataset in Datasets)
+                    {
+                        var stopwatch = new Stopwatch();
+                        stopwatch.Start();
+                        List<Time> times = new List<Time>();
+                        times = Time.GerarTimes(dataset, quantidadeEquipes);
 
-                            Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeTreino, quantidadeTreino, Datasets.IndexOf(dataset));
+                        Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeTreino, quantidadeTreino, Datasets.IndexOf(dataset));
 
-                            Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeTreino, quantidadeTreino);
-                            stopwatch.Restart();
-                        }
+                        Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeTreino, quantidadeTreino);
+                        stopwatch.Restart();
+                    }
                 }
             }
         }

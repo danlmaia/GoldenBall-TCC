@@ -107,18 +107,18 @@ namespace GoldenBall_TCC
             int clientPorCluster = dataset.QntClientes / dataset.QntDepositos;
 
             #region Clusterização Aleatoria.
-            int[,] idClient = GerarIdAleatorio(dataset.Id, dataset.QntClientes, qntDepo, clientPorCluster);
-            double[,] distanciaClienteParaDeposito = GerarDistanciaClienteDeposito(idClient, qntDepo, clientPorCluster, dataset);
+            //int[,] idClient = GerarIdAleatorio(dataset.Id, dataset.QntClientes, qntDepo, clientPorCluster);
+            //double[,] distanciaClienteParaDeposito = GerarDistanciaClienteDeposito(idClient, qntDepo, clientPorCluster, dataset);
             #endregion
 
             #region Clusterização por distancia. 
-            //double[,] dist = Utils.GerarMatrizDistancia(dataset);
+            double[,] dist = Utils.GerarMatrizDistancia(dataset);
 
-            //bool[] clienteDisponivelId = new bool[dataset.QntClientes];
-            //int[,] idClient = Cliente.GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
+            bool[] clienteDisponivelId = new bool[dataset.QntClientes];
+            int[,] idClient = Cliente.GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
 
-            //bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
-            //double[,] distanciaClienteParaDeposito = Utils.GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
+            bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
+            double[,] distanciaClienteParaDeposito = Utils.GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
             #endregion
 
 

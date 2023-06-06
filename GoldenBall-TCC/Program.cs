@@ -8,10 +8,13 @@ internal class Program
     {
         List<Dataset> Datasets = new List<Dataset>();
         string pathDataset;
+        string pathInstancePr;
 
 
-        for (int i = 1; i <= 33; i++)
+        for (int i = 1; i <= 23; i++)
         {
+            if (i == 1 || i == 2 || i == 6 || i == 08 || i == 10)
+                continue;
             if (i >= 10)
                 pathDataset = String.Format("..\\..\\..\\Datasets\\p{0}.txt", i);
             else
@@ -20,6 +23,17 @@ internal class Program
             Datasets.Add(Mapper.MapperData(pathDataset));
 
         }
+
+        for (int i = 1; i <= 10; i++)
+        {
+            if(i == 10)
+                pathInstancePr = String.Format("..\\..\\..\\Datasets\\pr{0}.txt", i);
+            else
+                pathInstancePr = String.Format("..\\..\\..\\Datasets\\pr0{0}.txt", i);
+
+            Datasets.Add(Mapper.MapperData(pathInstancePr));
+        }
+
         int[] quantEquipes = new int[2] { 4 , 8 };
         int[] quantTemporadas = new int[3] { 2, 4, 10 };
         int[] quantIntra = new int[4] { 10, 20, 50, 100 };
@@ -40,6 +54,7 @@ internal class Program
                         stopwatch.Start();
                         List<Time> times = new List<Time>();
                         times = Time.GerarTimes(dataset, quantidadeEquipes);
+                        //TODO OS COPIAR TIME E PASSAR NA FUNCAO DE PRINTAR A SOLUCAO A VERSÃO ANTIGA E PÓS ALGORITMO;
 
                         Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeTreino, quantidadeTreino, Datasets.IndexOf(dataset));
 

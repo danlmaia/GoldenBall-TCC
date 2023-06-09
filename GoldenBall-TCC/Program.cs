@@ -1,4 +1,5 @@
 ﻿using GoldenBall_TCC;
+using Newtonsoft.Json;
 using System.Data;
 using System.Diagnostics;
 
@@ -13,7 +14,7 @@ internal class Program
 
         for (int i = 1; i <= 23; i++)
         {
-            if (i == 1 || i == 2 || i == 6 || i == 08 || i == 10)
+            if (i == 1 || i == 2 || i == 6 || i == 08 || i == 10 || i == 11)
                 continue;
             if (i >= 10)
                 pathDataset = String.Format("..\\..\\..\\Datasets\\p{0}.txt", i);
@@ -34,13 +35,9 @@ internal class Program
             Datasets.Add(Mapper.MapperData(pathInstancePr));
         }
 
-        int[] quantEquipes = new int[2] { 4 , 8 };
-        int[] quantTemporadas = new int[3] { 2, 4, 10 };
-        int[] quantIntra = new int[4] { 10, 20, 50, 100 };
-        //int quantidadeEquipes = 8;
-        //int quantidadeTemporadas = 10;
-        //int quantidadeIntraTreino = 10;
-        //int quantidadeInterTreino = 10;
+        int[] quantEquipes = new int[1] { 8 };
+        int[] quantTemporadas = new int[1] { 2 };
+        int[] quantIntra = new int[1] { 100 };
 
         foreach (int quantidadeEquipes in quantEquipes)
         {
@@ -54,32 +51,19 @@ internal class Program
                         stopwatch.Start();
                         List<Time> times = new List<Time>();
                         times = Time.GerarTimes(dataset, quantidadeEquipes);
-                        //TODO OS COPIAR TIME E PASSAR NA FUNCAO DE PRINTAR A SOLUCAO A VERSÃO ANTIGA E PÓS ALGORITMO;
+
+                        string copiaTimes = JsonConvert.SerializeObject(times);
+                        List<Time> timesOriginais = JsonConvert.DeserializeObject<List<Time>>(copiaTimes);
 
                         Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeTreino, quantidadeTreino, Datasets.IndexOf(dataset));
 
-                        Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeTreino, quantidadeTreino);
+                        Time SolucaoInicial = Time.GetTimeById(solucao.Id, timesOriginais);
+
+                        Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, SolucaoInicial, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeTreino, quantidadeTreino);
                         stopwatch.Restart();
                     }
                 }
             }
         }
-
-        //foreach (Dataset dataset in Datasets)
-        //{
-        //    var stopwatch = new Stopwatch();
-        //    stopwatch.Start();
-        //    List<Time> times = new List<Time>();
-        //    times = Time.GerarTimes(dataset, quantidadeEquipes);
-
-        //    Time solucao = Competicao.Start(times, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino , Datasets.IndexOf(dataset));
-
-        //    Utils.PrintarSolucao(Datasets.IndexOf(dataset), solucao, stopwatch, quantidadeEquipes, quantidadeTemporadas, quantidadeIntraTreino, quantidadeIntraTreino);
-        //    stopwatch.Restart();
-
-        //}
-
-
     }
-
 }

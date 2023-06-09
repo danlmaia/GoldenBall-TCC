@@ -40,48 +40,64 @@ namespace GoldenBall_TCC
             }
         }
 
-        public static void PrintarSolucao(int idDataset, Time time, Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
+        public static void PrintarSolucao(int idDataset, Time time, Time solucaoInicial , Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
         {
-            HashSet<int> itensUnicos = new HashSet<int>();
-            Console.WriteLine("--------------------- ROTAS GERADAS -------------------------");
+            //HashSet<int> itensUnicos = new HashSet<int>();
+            //Console.WriteLine("--------------------- ROTAS GERADAS -------------------------");
 
-            foreach (Cluster cluster in time.Jogadores)
-            {
-                Console.WriteLine("Deposito: " + time.Jogadores.IndexOf(cluster));
-                Console.WriteLine("Demanda deposito: " + cluster.Capacidade);
-                int demanda = 0;
-                foreach (var cliente in cluster.Clientes)
-                {
-                    demanda += cliente.Demanda;
-                }
-                Console.WriteLine("Demanda total da rota: " + demanda);
-                Console.WriteLine("Distancia da rota: " + Math.Round(cluster.Rota.Distancia, 2));
+            //foreach (Cluster cluster in time.Jogadores)
+            //{
+            //    Console.WriteLine("Deposito: " + time.Jogadores.IndexOf(cluster));
+            //    Console.WriteLine("Demanda deposito: " + cluster.Capacidade);
+            //    int demanda = 0;
+            //    foreach (var cliente in cluster.Clientes)
+            //    {
+            //        demanda += cliente.Demanda;
+            //    }
+            //    Console.WriteLine("Demanda total da rota: " + demanda);
+            //    Console.WriteLine("Distancia da rota: " + Math.Round(cluster.Rota.Distancia, 2));
 
-                foreach (int cliente in cluster.Rota.Caminho)
-                {
-                    itensUnicos.Add(cliente);
-                    Console.WriteLine("clientes visitados: " + cliente);
-                }
-            }
+            //    foreach (int cliente in cluster.Rota.Caminho)
+            //    {
+            //        itensUnicos.Add(cliente);
+            //        Console.WriteLine("clientes visitados: " + cliente);
+            //    }
+            //}
 
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("Valor da solução: " + time.Valor);
-            Console.WriteLine("quantidade de clientes: " + itensUnicos.Count);
-            SalvarSolucao(idDataset, time, stopwatch, quantidadeEquipe, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino);
+            //Console.WriteLine("-------------------------");
+            //Console.WriteLine("Valor da solução: " + time.Valor);
+            //Console.WriteLine("quantidade de clientes: " + itensUnicos.Count);
+            SalvarSolucao(idDataset, time, solucaoInicial, stopwatch, quantidadeEquipe, quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino);
 
         }
 
-        public static void SalvarSolucao(int idDataset,Time time, Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
+        public static void SalvarSolucao(int idDataset,Time time, Time solucaoInicial , Stopwatch stopwatch, int quantidadeEquipe, int quantidadeTemporadas, int quantidadeIntraTreino, int quantidadeInterTreino)
         {
-            string nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\p0{4}.txt", quantidadeEquipe,
+            string nomeArquivo = string.Format("C:\\TCC\\Resultados\\Algoritmo C\\E{0}T{1}T{2}T{3}\\p0{4}.txt", quantidadeEquipe,
                     quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino, idDataset + 1);
             if(idDataset >= 9)
-                nomeArquivo = string.Format("C:\\TCC\\Resultados\\Rota inicial pela distancia\\Verificando inter treino\\E{0}T{1}T{2}T{3}\\p{4}.txt", quantidadeEquipe,
+                nomeArquivo = string.Format("C:\\TCC\\Resultados\\Algoritmo C\\E{0}T{1}T{2}T{3}\\p{4}.txt", quantidadeEquipe,
                     quantidadeTemporadas, quantidadeIntraTreino, quantidadeInterTreino, idDataset + 1);
 
 
             using (StreamWriter writer = new StreamWriter(nomeArquivo))
             {
+                foreach (Cluster cluster in solucaoInicial.Jogadores)
+                {
+                    for (int i = 0; i < cluster.Rota.Caminho.Count; i++)
+                    {
+                        writer.Write(cluster.Rota.Caminho[i]);
+
+                        // Adicione um espaço após cada item, exceto para o último item
+                        if (i < cluster.Rota.Caminho.Count)
+                        {
+                            writer.Write(" ");
+                        }
+                    }
+                }
+                writer.WriteLine();
+                writer.WriteLine("Valor da solucao: " + solucaoInicial.Valor);
+
                 foreach (Cluster cluster in time.Jogadores)
                 {
                     for (int i = 0; i < cluster.Rota.Caminho.Count; i++)
@@ -97,15 +113,11 @@ namespace GoldenBall_TCC
                 }
                 writer.WriteLine();
                 writer.WriteLine("Valor da solucao: " + time.Valor);
+                writer.WriteLine("Melhora em %: " + (100 - (time.Valor * 100 / solucaoInicial.Valor)));
                 stopwatch.Stop();
                 writer.WriteLine("Tempo de execução: " + stopwatch.Elapsed.TotalSeconds);
             }
-
         }
-
-
-
-
 
         public static Tuple<Cliente, double> PegarDistanciaClienteMaisProximo(List<Cliente> clientesVisitados, List<Cliente> clientes, List<Tuple<Cliente, double>> vetorAdjacencia)
         {

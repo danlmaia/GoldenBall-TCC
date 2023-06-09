@@ -11,6 +11,8 @@ namespace GoldenBall_TCC
 {
     public class Time
     {
+        public int Id { get; set; }
+
         public List<Cluster> Jogadores { get; set; }
 
         public Cluster Capitao { get; set; }
@@ -107,18 +109,18 @@ namespace GoldenBall_TCC
             int clientPorCluster = dataset.QntClientes / dataset.QntDepositos;
 
             #region Clusterização Aleatoria.
-            //int[,] idClient = GerarIdAleatorio(dataset.Id, dataset.QntClientes, qntDepo, clientPorCluster);
-            //double[,] distanciaClienteParaDeposito = GerarDistanciaClienteDeposito(idClient, qntDepo, clientPorCluster, dataset);
+            int[,] idClient = GerarIdAleatorio(dataset.Id, dataset.QntClientes, qntDepo, clientPorCluster);
+            double[,] distanciaClienteParaDeposito = GerarDistanciaClienteDeposito(idClient, qntDepo, clientPorCluster, dataset);
             #endregion
 
             #region Clusterização por distancia. 
-            double[,] dist = Utils.GerarMatrizDistancia(dataset);
+            //double[,] dist = Utils.GerarMatrizDistancia(dataset);
 
-            bool[] clienteDisponivelId = new bool[dataset.QntClientes];
-            int[,] idClient = Cliente.GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
+            //bool[] clienteDisponivelId = new bool[dataset.QntClientes];
+            //int[,] idClient = Cliente.GerarIdClientClusters(dist, clienteDisponivelId, qntDepo, clientPorCluster);
 
-            bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
-            double[,] distanciaClienteParaDeposito = Utils.GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
+            //bool[] clienteDisponivelDistancia = new bool[dataset.QntClientes];
+            //double[,] distanciaClienteParaDeposito = Utils.GerarDistClusters(dist, clienteDisponivelDistancia, qntDepo, clientPorCluster);
             #endregion
 
 
@@ -139,7 +141,7 @@ namespace GoldenBall_TCC
                 {
                     time.Jogadores.Add(cluster);
                 }
-
+                time.Id = i;
                 time.Capitao = DefinirCapitao(time);
                 time.PiorJogador = DefinirPiorJogador(time);
                 time.Valor = GerarValorTime(time);
@@ -147,7 +149,6 @@ namespace GoldenBall_TCC
                 times.Add(time);
             }
 
-            //Utils.PrintarClusters(0, times);
             return times;
         }
 
@@ -502,7 +503,7 @@ namespace GoldenBall_TCC
 
                         if(dist > cluster.Rota.Distancia)
                         {
-                            for (int i = 0; i < quantidadeIntraTreino; i++) // 10 Treinos
+                            for (int i = 0; i < quantidadeIntraTreino; i++)
                             {
                                 List<int> newRota = TrocarRotaInternoCluster(cluster, rota);
                                 dist = CalcularNovaDistanciaInterno(cluster, newRota);
@@ -641,6 +642,15 @@ namespace GoldenBall_TCC
             }
 
             return times;
+        }
+
+        public static Time GetTimeById(int id, List<Time> times)
+        {
+            foreach(Time time in times)
+            {
+                if(time.Id == id) return time;
+            }
+            return null;
         }
 
     }

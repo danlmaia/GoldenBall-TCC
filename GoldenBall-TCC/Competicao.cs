@@ -19,6 +19,7 @@ namespace GoldenBall_TCC
                     foreach (Time time in times)
                         Time.TreinarJogador(time, quantidadeIntraTreino);
                     times = Time.TreinarTime(times, quantidadeIntraTreino, quantidadeInterTreino);
+                    //times = Time.TreinarTimeSemVerificar(times, quantidadeIntraTreino, quantidadeInterTreino);
 
                     times = Time.AtualizarTimes(times);
 
@@ -43,16 +44,19 @@ namespace GoldenBall_TCC
                 }
                 else
                 {
-                    MediaValorSolucaoGeralAtual = Time.CalcularValorSolucoesGeral(times);
-                    if (solucaoAntiga.Valor <= times[0].Valor) // Verificando se houve melhora na melhor solução.
-                        return solucaoAntiga;
-                    else
-                        solucaoAntiga = times[0];
+                    if(i >= 2)
+                    {
+                        MediaValorSolucaoGeralAtual = Time.CalcularValorSolucoesGeral(times);
+                        if (solucaoAntiga.Valor <= times[0].Valor && MediaValorSolucoesGeral <= MediaValorSolucaoGeralAtual) // Verificando se houve melhora na melhor solução.
+                            return solucaoAntiga;
+                        else
+                            solucaoAntiga = times[0];
 
-                    if (MediaValorSolucoesGeral <= MediaValorSolucaoGeralAtual) // Verificando se houve melhora na média da pontuação de todas soluções.
-                        return solucaoAntiga;
+                        //if (MediaValorSolucoesGeral <= MediaValorSolucaoGeralAtual) // Verificando se houve melhora na média da pontuação de todas soluções.
+                        //    return solucaoAntiga;
 
-                    MediaValorSolucoesGeral = MediaValorSolucaoGeralAtual;
+                        MediaValorSolucoesGeral = MediaValorSolucaoGeralAtual;
+                    }
                 }
                 times = Transferencia(times);
                 times = Time.AtualizarTimes(times);

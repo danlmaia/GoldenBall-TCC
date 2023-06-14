@@ -36,7 +36,7 @@ internal class Program
         }
 
         int[] quantEquipes = new int[1] { 8 };
-        int[] quantTemporadas = new int[1] { 2 };
+        int[] quantTemporadas = new int[1] { 4 };
         int[] quantIntra = new int[1] { 100 };
 
         foreach (int quantidadeEquipes in quantEquipes)
